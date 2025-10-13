@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Iniciar Sesión — Monitoreo DHT22</title>
+  <style>
+    body {
+      background-color: #0d1b2a;
+      color: #e0e1dd;
+      font-family: "Segoe UI", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .login-box {
+      background-color: #1b263b;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      width: 350px;
+      text-align: center;
+    }
+    input {
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      text-align: center;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      background: #00b4d8;
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover { background: #06d6a0; }
+    .error { color: #ff595e; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>🔐 Acceso al Panel DHT22</h2>
+    <form method="POST">
+      <input type="text" name="usuario" placeholder="Usuario" required><br>
+      <input type="password" name="contrasena" placeholder="Contraseña" required><br>
+      <button type="submit">Ingresar</button>
+    </form>
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+  </div>
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>🌡️ Panel DHT22 — Comparador de Días</title>
+  <script src="/static/chart.min.js"></script>
+  <style>
+    :root {
+      --bg: #0d1b2a;
+      --card: #1b263b;
+      --text: #e0e1dd;
+      --accent: #00b4d8;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      text-align: center;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    header {
+      background: var(--card);
+      color: var(--accent);
+      padding: 15px;
+      font-size: 1.8em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    main { margin: 20px auto; width: 95%; max-width: 1100px; }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      margin-bottom: 20px;
+      transition: background 0.3s;
+    }
+    canvas {
+      background: var(--card);
+      border-radius: 16px;
+      width: 100%;
+      padding: 15px;
+      transition: background 0.3s;
+    }
+    footer { margin-top: 30px; padding: 10px; color: var(--accent); }
+    input[type="date"], select {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 6px 10px;
+    }
+
+    select {
+      font-size: 0.8em;
+      margin-left: 10px;
+    }
+
+    /* Estilos para cuadro en tiempo real */
+    .real-time {
+      font-size: 2em;
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      color: var(--accent);
+    }
+    .rt-item {
+      background: var(--card);
+      padding: 15px 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease;
+    }
+    .rt-item:hover { transform: scale(1.05); }
+    .rt-value {
+      font-size: 2.2em;
+      font-weight: bold;
+    }
+    .rt-label {
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    🌡️ Panel DHT22
+    <div>
+      <label for="tema">🎨 Tema:</label>
+      <select id="tema">
+        <option value="oscuro">Oscuro Técnico</option>
+        <option value="claro">Claro Moderno</option>
+        <option value="eco">Eco Verde</option>
+        <option value="solar">Solar</option>
+        <option value="nocturno">Nocturno Púrpura</option>
+        <option value="industrial">Industrial Gris</option>
+      </select>
+      <button onclick="window.location.href='/logout'" style="background:var(--accent);color:white;border:none;border-radius:8px;padding:8px 14px;">Salir</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>📊 Valores Extremos Globales</h2>
+      <div id="extremos">
+        🌡️ Máx: <span id="tmax">--</span> °C | Mín: <span id="tmin">--</span> °C <br>
+        💧 Máx: <span id="hmax">--</span> % | Mín: <span id="hmin">--</span> % <br><br>
+        🌡️ Promedio: <span id="tmean">--</span> °C (±<span id="tstd">--</span>) |
+        💧 Promedio: <span id="hmean">--</span> % (±<span id="hstd">--</span>)
+      </div>
+    </div>
+
+    <!-- 🟢 Nuevo cuadro de valores en tiempo real -->
+    <div class="real-time">
+      <div class="rt-item">
+        <div class="rt-label">Temperatura actual</div>
+        <div id="tempActual" class="rt-value">-- °C</div>
+      </div>
+      <div class="rt-item">
+        <div class="rt-label">Humedad actual</div>
+        <div id="humActual" class="rt-value">-- %</div>
+      </div>
+      <div class="rt-item">
+        <div class="rt-label">Última lectura</div>
+        <div id="horaLectura" class="rt-value">--:--:--</div>
+      </div>
+    </div>
+
+    <canvas id="grafico"></canvas>
+
+    <h2>📆 Histórico Diario (Comparador de días)</h2>
+    <input type="date" id="fechaComparar">
+    <canvas id="historico"></canvas>
+  </main>
+
+  <footer>Desarrollado por Nicolás Valdés © 2025</footer>
+
+  <script>
+    // ============ SISTEMA DE TEMAS ==============
+    const temas = {
+      oscuro:   { bg:"#0d1b2a", card:"#1b263b", text:"#e0e1dd", accent:"#00b4d8" },
+      claro:    { bg:"#f0f0f0", card:"#ffffff", text:"#202020", accent:"#0077b6" },
+      eco:      { bg:"#0a3d2d", card:"#14532d", text:"#eaffea", accent:"#00c853" },
+      solar:    { bg:"#fff4e6", card:"#ffe5b4", text:"#4b2e05", accent:"#ff9800" },
+      nocturno: { bg:"#1c0f33", card:"#2d1b4c", text:"#e3d7ff", accent:"#a46bf5" },
+      industrial:{ bg:"#2b2b2b", card:"#3c3c3c", text:"#f0f0f0", accent:"#e63946" }
+    };
+
+    const selectTema = document.getElementById("tema");
+    function aplicarTema(nombre) {
+      const t = temas[nombre];
+      if (!t) return;
+      document.documentElement.style.setProperty("--bg", t.bg);
+      document.documentElement.style.setProperty("--card", t.card);
+      document.documentElement.style.setProperty("--text", t.text);
+      document.documentElement.style.setProperty("--accent", t.accent);
+      localStorage.setItem("temaSeleccionado", nombre);
+    }
+
+    const guardado = localStorage.getItem("temaSeleccionado") || "oscuro";
+    aplicarTema(guardado);
+    selectTema.value = guardado;
+    selectTema.addEventListener("change", e => aplicarTema(e.target.value));
+
+    // ============ GRÁFICOS ==============
+    const ctx = document.getElementById('grafico').getContext('2d');
+    const grafico = new Chart(ctx, {
+      type: 'line',
+      data: { labels: [], datasets: [
+        { label: 'Temperatura (°C)', data: [], borderColor: '#ff6b6b', fill:false },
+        { label: 'Humedad (%)', data: [], borderColor: '#48cae4', fill:false }
+      ]},
+      options: { animation:false, responsive:true }
+    });
+
+    async function actualizar() {
+      const resp = await fetch('/data');
+      const d = await resp.json();
+      if (!d) return;
+      const hora = new Date().toLocaleTimeString();
+      grafico.data.labels.push(hora);
+      grafico.data.datasets[0].data.push(d.temperatura);
+      grafico.data.datasets[1].data.push(d.humedad);
+      if (grafico.data.labels.length > 30) {
+        grafico.data.labels.shift();
+        grafico.data.datasets.forEach(ds => ds.data.shift());
+      }
+      grafico.update();
+
+      // 🔵 Actualizar cuadro de valores en tiempo real
+      document.getElementById('tempActual').innerText = `${d.temperatura.toFixed(2)} °C`;
+      document.getElementById('humActual').innerText = `${d.humedad.toFixed(2)} %`;
+      document.getElementById('horaLectura').innerText = hora;
+    }
+
+    const ctxHist = document.getElementById('historico').getContext('2d');
+    const graficoHist = new Chart(ctxHist, {
+      type: 'line',
+      data: { labels: [], datasets: [] },
+      options: { responsive:true }
+    });
+
+    async function actualizarHistorico() {
+      const r = await fetch('/historico_data');
+      const h = await r.json();
+      if (h.error) return;
+      graficoHist.data = {
+        labels: h.fechas,
+        datasets: [
+          { label: "Temp. promedio hoy (°C)", data: h.temp_mean, borderColor: "#00b4d8", fill:false },
+          { label: "Hum. promedio hoy (%)", data: h.hum_mean, borderColor: "#48cae4", fill:false }
+        ]
+      };
+      graficoHist.update();
+    }
+
+    async function compararFecha(fecha) {
+      const r = await fetch(`/historico_por_fecha/${fecha}`);
+      const h = await r.json();
+      if (h.error) return alert("No hay datos para esa fecha.");
+      graficoHist.data.datasets = graficoHist.data.datasets.filter(ds => !ds.label.includes("comparado"));
+      graficoHist.data.datasets.push(
+        { label: `Temp. comparado ${fecha}`, data: h.temp_mean, borderColor: "#ffb703", borderDash:[5,5], fill:false },
+        { label: `Hum. comparado ${fecha}`, data: h.hum_mean, borderColor: "#fb8500", borderDash:[5,5], fill:false }
+      );
+      graficoHist.update();
+    }
+
+    document.getElementById('fechaComparar').addEventListener('change', e => compararFecha(e.target.value));
+
+    async function actualizarExtremos() {
+      const r = await fetch('/extremos');
+      const e = await r.json();
+      if (e.error) return;
+      document.getElementById('tmax').innerText = e.temp_max.toFixed(2);
+      document.getElementById('tmin').innerText = e.temp_min.toFixed(2);
+      document.getElementById('hmax').innerText = e.hum_max.toFixed(2);
+      document.getElementById('hmin').innerText = e.hum_min.toFixed(2);
+      document.getElementById('tmean').innerText = e.temp_mean.toFixed(2);
+      document.getElementById('tstd').innerText = e.temp_std.toFixed(2);
+      document.getElementById('hmean').innerText = e.hum_mean.toFixed(2);
+      document.getElementById('hstd').innerText = e.hum_std.toFixed(2);
+    }
+
+    // Intervalos
+    setInterval(actualizar, 2000);
+    setInterval(actualizarHistorico, 15000);
+    setInterval(actualizarExtremos, 30000);
+    actualizarHistorico();
+    actualizarExtremos();
+  </script>
+</body>
+</html>

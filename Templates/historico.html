@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📆 Histórico de Temperatura y Humedad</title>
+  <script src="/static/chart.min.js"></script>
+  <style>
+    body {
+      background-color: #0d1b2a;
+      color: #e0e1dd;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1 { color: #00bcd4; margin-top: 25px; }
+    canvas {
+      background: #1b263b;
+      border-radius: 10px;
+      width: 90%;
+      height: 400px;
+      margin: 30px auto;
+      display: block;
+      padding: 20px;
+    }
+    a {
+      text-decoration: none;
+      background-color: #00bcd4;
+      color: white;
+      padding: 10px 25px;
+      border-radius: 10px;
+      margin: 10px;
+      display: inline-block;
+    }
+    a:hover { background-color: #0097a7; }
+  </style>
+</head>
+<body>
+  <h1>📊 Histórico de Temperatura y Humedad</h1>
+  <a href="/">🏠 Volver al Panel en Vivo</a>
+
+  <canvas id="histTemp"></canvas>
+  <canvas id="histHum"></canvas>
+
+  <script>
+    async function cargarHistorico() {
+      try {
+        const res = await fetch("/historico_data");
+        const data = await res.json();
+        if (!data.error) {
+          const ctxTemp = document.getElementById("histTemp").getContext("2d");
+          const ctxHum = document.getElementById("histHum").getContext("2d");
+
+          new Chart(ctxTemp, {
+            type: "bar",
+            data: { labels: data.fechas, datasets: [{
+              label: "Promedio de Temperatura (°C)",
+              backgroundColor: "#00bcd4",
+              data: data.temperaturas
+            }]},
+            options: { scales: { y: { beginAtZero: true } } }
+          });
+
+          new Chart(ctxHum, {
+            type: "bar",
+            data: { labels: data.fechas, datasets: [{
+              label: "Promedio de Humedad (%)",
+              backgroundColor: "#f06292",
+              data: data.humedades
+            }]},
+            options: { scales: { y: { beginAtZero: true } } }
+          });
+        }
+      } catch (err) {
+        console.log("Error al cargar histórico:", err);
+      }
+    }
+    cargarHistorico();
+  </script>
+</body>
+</html>
