@@ -2,6 +2,9 @@ services:
   - type: web
     name: panel-dht22
     env: python
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
-    pythonVersion: 3.11.9
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
