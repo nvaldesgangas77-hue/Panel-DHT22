@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: panel-dht22
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    pythonVersion: 3.11.9
