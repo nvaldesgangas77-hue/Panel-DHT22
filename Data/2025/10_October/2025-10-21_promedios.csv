@@ -1,0 +1,5 @@
+Fecha,Hora,Temp promedio (�C),Hum promedio (%),Temp externa (�C),Hum externa (%),Condici�n clim�tica
+2025-10-21,00:05:30,23.79,47.87,N/A,N/A,N/A
+2025-10-21,09:43:24,23.46,47.97,N/A,N/A,N/A
+2025-10-21;09:57:30;22.15;48.18;N/A;N/A;N/A;Fuera de rango;Fuera de rango;"⚠️ Temperatura fuera de rango (22.1 °C; ideal 34–36 °C). ⚠️ Humedad fuera de rango (48.2 %; ideal 50–80 %)."
+2025-10-21;10:38:49;24.11;44.99;16.84;54;cielo claro;Fuera de rango;Fuera de rango;⚠️ Temperatura fuera de rango (24.1 °C). ⚠️ Humedad fuera de rango (45.0 %).

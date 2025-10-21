@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>🌡️ Panel DHT22 — Comparador de Días</title>
-  <script src="/static/chart.min.js"></script>
+  <script src="{{ url_for('static', filename='chart.min.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
   <style>
     :root {
       --bg: #0d1b2a;
@@ -119,6 +121,19 @@
   </header>
 
   <main>
+    <div id="alertaPanel" style="
+  display:none;
+  background-color:#8b0000;
+  color:white;
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:15px;
+  font-weight:bold;
+  box-shadow:0 4px 12px rgba(0,0,0,0.5);
+">
+⚠️ Alerta ambiental activa
+</div>
+
     <div class="card">
       <h2>📊 Valores Extremos Globales</h2>
       <div id="extremos">
@@ -127,6 +142,20 @@
         🌡️ Promedio: <span id="tmean">--</span> °C (±<span id="tstd">--</span>) |
         💧 Promedio: <span id="hmean">--</span> % (±<span id="hstd">--</span>)
       </div>
+      <hr style="margin:15px 0; border:1px solid var(--accent); opacity:0.3;">
+<h3>🌦️ Clima Externo (API Meteorológica)</h3>
+<div id="panelClima" style="
+  background:#223040;
+  border-radius:12px;
+  padding:12px;
+  margin-top:10px;
+  font-size:1.1em;
+  color:#e0e1dd;
+  box-shadow:0 4px 12px rgba(0,0,0,0.4);
+  transition:background 0.5s ease;">
+  <div id="climaExterno">Cargando datos meteorológicos...</div>
+</div>
+
     </div>
 
     <div class="real-time">
@@ -150,6 +179,7 @@
     <div style="margin-bottom:10px;">
       <input type="date" id="fechaComparar">
       <button id="limpiarComparaciones">🧹 Limpiar comparaciones</button>
+      <button onclick="window.open('/generar_pdf', '_blank')">📄 Descargar informe PDF</button>
     </div>
     <canvas id="historico"></canvas>
   </main>
@@ -157,47 +187,55 @@
   <footer>Desarrollado por Nicolás Valdés © 2025</footer>
 
   <script>
-    // ====== TEMAS ======
-    const temas = {
-      oscuro:{bg:"#0d1b2a",card:"#1b263b",text:"#e0e1dd",accent:"#00b4d8"},
-      claro:{bg:"#f0f0f0",card:"#ffffff",text:"#202020",accent:"#0077b6"},
-      eco:{bg:"#0a3d2d",card:"#14532d",text:"#eaffea",accent:"#00c853"},
-      solar:{bg:"#fff4e6",card:"#ffe5b4",text:"#4b2e05",accent:"#ff9800"},
-      nocturno:{bg:"#1c0f33",card:"#2d1b4c",text:"#e3d7ff",accent:"#a46bf5"},
-      industrial:{bg:"#2b2b2b",card:"#3c3c3c",text:"#f0f0f0",accent:"#e63946"}
-    };
+  // ====== TEMAS ======
+  const temas = {
+    oscuro:{bg:"#0d1b2a",card:"#1b263b",text:"#e0e1dd",accent:"#00b4d8"},
+    claro:{bg:"#f0f0f0",card:"#ffffff",text:"#202020",accent:"#0077b6"},
+    eco:{bg:"#0a3d2d",card:"#14532d",text:"#eaffea",accent:"#00c853"},
+    solar:{bg:"#fff4e6",card:"#ffe5b4",text:"#4b2e05",accent:"#ff9800"},
+    nocturno:{bg:"#1c0f33",card:"#2d1b4c",text:"#e3d7ff",accent:"#a46bf5"},
+    industrial:{bg:"#2b2b2b",card:"#3c3c3c",text:"#f0f0f0",accent:"#e63946"}
+  };
 
-    const selectTema=document.getElementById("tema");
-    function aplicarTema(nombre){
-      const t=temas[nombre];
-      if(!t)return;
-      document.documentElement.style.setProperty("--bg",t.bg);
-      document.documentElement.style.setProperty("--card",t.card);
-      document.documentElement.style.setProperty("--text",t.text);
-      document.documentElement.style.setProperty("--accent",t.accent);
-      localStorage.setItem("temaSeleccionado",nombre);
-    }
-    const guardado=localStorage.getItem("temaSeleccionado")||"oscuro";
-    aplicarTema(guardado);
-    selectTema.value=guardado;
-    selectTema.addEventListener("change",e=>aplicarTema(e.target.value));
+  const selectTema=document.getElementById("tema");
+  function aplicarTema(nombre){
+    const t=temas[nombre];
+    if(!t)return;
+    document.documentElement.style.setProperty("--bg",t.bg);
+    document.documentElement.style.setProperty("--card",t.card);
+    document.documentElement.style.setProperty("--text",t.text);
+    document.documentElement.style.setProperty("--accent",t.accent);
+    localStorage.setItem("temaSeleccionado",nombre);
+  }
+  const guardado=localStorage.getItem("temaSeleccionado")||"oscuro";
+  aplicarTema(guardado);
+  selectTema.value=guardado;
+  selectTema.addEventListener("change",e=>aplicarTema(e.target.value));
 
-    // ====== GRÁFICO EN VIVO ======
-    const ctx=document.getElementById('grafico').getContext('2d');
-    const grafico=new Chart(ctx,{
-      type:'line',
-      data:{labels:[],datasets:[
-        {label:'Temperatura (°C)',data:[],borderColor:'#ff6b6b',fill:false},
-        {label:'Humedad (%)',data:[],borderColor:'#48cae4',fill:false}
-      ]},
-      options:{animation:false,responsive:true}
-    });
+  // ====== GRÁFICO EN VIVO ======
+  const ctx=document.getElementById('grafico').getContext('2d');
+  const grafico=new Chart(ctx,{
+    type:'line',
+    data:{labels:[],datasets:[
+      {label:'Temperatura (°C)',data:[],borderColor:'#ff6b6b',fill:false},
+      {label:'Humedad (%)',data:[],borderColor:'#48cae4',fill:false}
+    ]},
+    options:{animation:false,responsive:true}
+  });
 
-    async function actualizar(){
-      const resp=await fetch('/data');
-      const d=await resp.json();
-      if(!d)return;
-      const hora=new Date().toLocaleTimeString();
+  let ultimaHoraPromedio = null;
+
+  async function actualizar(){
+    const resp=await fetch('/data');
+    const d=await resp.json();
+    if(!d)return;
+
+    const hora=new Date().toLocaleTimeString();
+    document.getElementById('tempActual').innerText=`${d.temperatura.toFixed(2)} °C`;
+    document.getElementById('humActual').innerText=`${d.humedad.toFixed(2)} %`;
+    document.getElementById('horaLectura').innerText=hora;
+
+    if (!ultimaHoraPromedio || (new Date() - ultimaHoraPromedio) >= 10*60*1000 || d.promedio === true) {
       grafico.data.labels.push(hora);
       grafico.data.datasets[0].data.push(d.temperatura);
       grafico.data.datasets[1].data.push(d.humedad);
@@ -206,79 +244,141 @@
         grafico.data.datasets.forEach(ds=>ds.data.shift());
       }
       grafico.update();
-
-      document.getElementById('tempActual').innerText=`${d.temperatura.toFixed(2)} °C`;
-      document.getElementById('humActual').innerText=`${d.humedad.toFixed(2)} %`;
-      document.getElementById('horaLectura').innerText=hora;
+      ultimaHoraPromedio = new Date();
     }
+  }
 
-    // ====== HISTÓRICO ======
-    const ctxHist=document.getElementById('historico').getContext('2d');
-    const graficoHist=new Chart(ctxHist,{
-      type:'line',
-      data:{labels:[],datasets:[]},
-      options:{responsive:true}
+  // ====== HISTÓRICO ======
+  const ctxHist=document.getElementById('historico').getContext('2d');
+  const graficoHist=new Chart(ctxHist,{
+    type:'line',
+    data:{labels:[],datasets:[]},
+    options:{responsive:true}
+  });
+
+  let comparaciones=[];
+
+  async function actualizarHistorico(){
+    const r=await fetch('/historico_data');
+    const h=await r.json();
+    if(h.error)return;
+    const baseDatasets=[
+      {label:"Temp. promedio hoy (°C)",data:h.temp_mean,borderColor:"#00b4d8",fill:false},
+      {label:"Hum. promedio hoy (%)",data:h.hum_mean,borderColor:"#48cae4",fill:false}
+    ];
+    graficoHist.data.labels=h.fechas;
+    graficoHist.data.datasets=[...baseDatasets,...comparaciones];
+    graficoHist.update();
+  }
+
+  async function compararFecha(fecha){
+    const r=await fetch(`/historico_por_fecha/${fecha}`);
+    const h=await r.json();
+    if(h.error)return alert("No hay datos para esa fecha.");
+    comparaciones.push(
+      {label:`Temp. comparado ${fecha}`,data:h.temp_mean,borderColor:"#ffb703",borderDash:[5,5],fill:false},
+      {label:`Hum. comparado ${fecha}`,data:h.hum_mean,borderColor:"#fb8500",borderDash:[5,5],fill:false}
+    );
+    graficoHist.data.datasets=[...graficoHist.data.datasets,...comparaciones];
+    graficoHist.update();
+
+    // 🔹 Enviar las fechas comparadas al servidor Flask
+    const fechas = comparaciones.map(ds => ds.label.match(/\d{4}-\d{2}-\d{2}/)?.[0]).filter(Boolean);
+    await fetch("/set_fechas_comparadas", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ fechas })
     });
+  }
 
-    let comparaciones=[];
-
-    async function actualizarHistorico(){
-      const r=await fetch('/historico_data');
-      const h=await r.json();
-      if(h.error)return;
-      const baseDatasets=[
-        {label:"Temp. promedio hoy (°C)",data:h.temp_mean,borderColor:"#00b4d8",fill:false},
-        {label:"Hum. promedio hoy (%)",data:h.hum_mean,borderColor:"#48cae4",fill:false}
-      ];
-      graficoHist.data.labels=h.fechas;
-      graficoHist.data.datasets=[...baseDatasets,...comparaciones];
-      graficoHist.update();
-    }
-
-    async function compararFecha(fecha){
-      const r=await fetch(`/historico_por_fecha/${fecha}`);
-      const h=await r.json();
-      if(h.error)return alert("No hay datos para esa fecha.");
-
-      // Agregar curvas nuevas SIN eliminar las anteriores
-      comparaciones.push(
-        {label:`Temp. comparado ${fecha}`,data:h.temp_mean,borderColor:"#ffb703",borderDash:[5,5],fill:false},
-        {label:`Hum. comparado ${fecha}`,data:h.hum_mean,borderColor:"#fb8500",borderDash:[5,5],fill:false}
-      );
-
-      graficoHist.data.datasets=[...graficoHist.data.datasets,...comparaciones];
-      graficoHist.update();
-    }
-
-    // Limpiar comparaciones manualmente
-    document.getElementById('limpiarComparaciones').addEventListener('click',()=>{
-      comparaciones=[];
-      actualizarHistorico();
+  document.getElementById('limpiarComparaciones').addEventListener('click',async ()=>{
+    comparaciones=[];
+    await fetch("/set_fechas_comparadas", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ fechas: [] })
     });
-
-    document.getElementById('fechaComparar').addEventListener('change',e=>compararFecha(e.target.value));
-
-    // ====== EXTREMOS ======
-    async function actualizarExtremos(){
-      const r=await fetch('/extremos');
-      const e=await r.json();
-      if(e.error)return;
-      document.getElementById('tmax').innerText=e.temp_max.toFixed(2);
-      document.getElementById('tmin').innerText=e.temp_min.toFixed(2);
-      document.getElementById('hmax').innerText=e.hum_max.toFixed(2);
-      document.getElementById('hmin').innerText=e.hum_min.toFixed(2);
-      document.getElementById('tmean').innerText=e.temp_mean.toFixed(2);
-      document.getElementById('tstd').innerText=e.temp_std.toFixed(2);
-      document.getElementById('hmean').innerText=e.hum_mean.toFixed(2);
-      document.getElementById('hstd').innerText=e.hum_std.toFixed(2);
-    }
-
-    // ====== INTERVALOS ======
-    setInterval(actualizar,2000);
-    setInterval(actualizarHistorico,15000);
-    setInterval(actualizarExtremos,30000);
     actualizarHistorico();
-    actualizarExtremos();
+  });
+
+  document.getElementById('fechaComparar').addEventListener('change',e=>compararFecha(e.target.value));
+
+  // ====== EXTREMOS ======
+  async function actualizarExtremos(){
+    const r=await fetch('/extremos');
+    const e=await r.json();
+    if(e.error)return;
+    document.getElementById('tmax').innerText=e.temp_max.toFixed(2);
+    document.getElementById('tmin').innerText=e.temp_min.toFixed(2);
+    document.getElementById('hmax').innerText=e.hum_max.toFixed(2);
+    document.getElementById('hmin').innerText=e.hum_min.toFixed(2);
+    document.getElementById('tmean').innerText=e.temp_mean.toFixed(2);
+    document.getElementById('tstd').innerText=e.temp_std.toFixed(2);
+    document.getElementById('hmean').innerText=e.hum_mean.toFixed(2);
+    document.getElementById('hstd').innerText=e.hum_std.toFixed(2);
+  }
+// ====== CLIMA EXTERNO (API OpenWeatherMap) ======
+async function actualizarClimaExterno() {
+  try {
+    const r = await fetch("/clima_externo");
+    const d = await r.json();
+    const div = document.getElementById("climaExterno");
+    const panel = document.getElementById("panelClima");
+
+    if (d.error) {
+      div.innerText = "No disponible.";
+      panel.style.background = "#444";
+      return;
+    }
+
+    div.innerText = `🌤️ ${d.temp.toFixed(1)} °C | 💧 ${d.hum}% | ${d.desc}`;
+
+    // Cambia color del panel según temperatura
+    if (d.temp < 20) {
+      panel.style.background = "#2a4d7a"; // azul frío
+    } else if (d.temp > 30) {
+      panel.style.background = "#7a2a2a"; // rojo cálido
+    } else {
+      panel.style.background = "#2a7a4d"; // verde templado
+    }
+
+  } catch (err) {
+    document.getElementById("climaExterno").innerText = "Error obteniendo datos.";
+  }
+}
+
+  // ====== INTERVALOS ======
+  setInterval(actualizar,60000);
+  setInterval(actualizarHistorico,600000);
+  setInterval(actualizarExtremos,30000);
+  setInterval(actualizarAlerta,30000);
+
+
+  actualizarHistorico();
+  actualizarExtremos();
+  actualizarClimaExterno();
+  // ====== ALERTAS DE UMBRALES ======
+async function actualizarAlerta() {
+  try {
+    const r = await fetch("/alerta");
+    const d = await r.json();
+    const panel = document.getElementById("alertaPanel");
+
+    if (d.temp || d.hum) {
+      panel.style.display = "block";
+      panel.innerText = d.msg || "⚠️ Condiciones fuera de rango.";
+    } else {
+      panel.style.display = "none";
+    }
+  } catch (err) {
+    console.log("Error verificando alerta:", err);
+  }
+}
+
+// Verifica cada 30 segundos
+setInterval(actualizarAlerta, 30000);
+actualizarAlerta();
+
   </script>
 </body>
 </html>

@@ -1,0 +1,123 @@
+/* 🎨 Tema principal púrpura oscuro - HiveSim */
+body {
+    background-color: #1a0933;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+}
+
+/* 🟣 Barra superior */
+header {
+    background-color: #2d0d57;
+    color: white;
+    padding: 15px 0;
+    text-align: center;
+    font-size: 1.6em;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+/* 🔴 Alerta superior */
+.alerta {
+    background-color: #b80000;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    margin: 20px;
+    box-shadow: 0 0 8px rgba(255, 0, 0, 0.4);
+}
+
+/* 🟣 Tarjetas (paneles de datos) */
+.card {
+    background-color: #2b0b4f;
+    border-radius: 12px;
+    margin: 25px auto;
+    padding: 20px;
+    width: 85%;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+/* 🟠 Títulos de las secciones */
+h2, h3 {
+    color: #ffcc00;
+    text-align: center;
+}
+
+/* 📊 Tablas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th {
+    background-color: #3d136b;
+    color: #ffffff;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+td {
+    background-color: #240842;
+    padding: 8px;
+    text-align: center;
+    border-bottom: 1px solid #4b3270;
+}
+
+/* 🔲 Fila de alerta amarilla o roja (en Excel también lo verás así) */
+tr.alerta {
+    background-color: #fff2cc;
+    color: #000;
+}
+
+tr.critica {
+    background-color: #f8cbad;
+    color: #000;
+}
+
+/* 🟢 Fila normal */
+tr.normal {
+    background-color: #c6efce;
+    color: #000;
+}
+
+/* 🕹️ Botones */
+button, .btn {
+    background-color: #4b1d86;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+button:hover, .btn:hover {
+    background-color: #6633cc;
+}
+
+/* 📱 Responsivo (móvil) */
+@media (max-width: 768px) {
+    .card {
+        width: 95%;
+        padding: 15px;
+    }
+
+    table {
+        font-size: 0.9em;
+    }
+}
+
+/* ⚙️ Pie de página */
+footer {
+    text-align: center;
+    color: #aaa;
+    font-size: 0.9em;
+    margin: 30px 0;
+}

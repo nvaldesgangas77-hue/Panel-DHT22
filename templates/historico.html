@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>📆 Histórico de Temperatura y Humedad</title>
-  <script src="/static/chart.min.js"></script>
+  <script src="{{ url_for('static', filename='chart.min.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <style>
     body {
       background-color: #0d1b2a;
@@ -57,7 +58,7 @@
             data: { labels: data.fechas, datasets: [{
               label: "Promedio de Temperatura (°C)",
               backgroundColor: "#00bcd4",
-              data: data.temperaturas
+              data: data.temp_mean
             }]},
             options: { scales: { y: { beginAtZero: true } } }
           });
@@ -67,7 +68,7 @@
             data: { labels: data.fechas, datasets: [{
               label: "Promedio de Humedad (%)",
               backgroundColor: "#f06292",
-              data: data.humedades
+              data: data.hum_mean
             }]},
             options: { scales: { y: { beginAtZero: true } } }
           });

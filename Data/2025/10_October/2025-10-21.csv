@@ -1,0 +1,37 @@
+Fecha,Hora,Temperatura (�C),Humedad (%)
+2025-10-21,00:00:18,23.8,47.9
+2025-10-21,00:01:20,23.8,47.9
+2025-10-21,00:02:23,23.7,47.8
+2025-10-21,00:03:25,23.8,47.9
+2025-10-21,00:04:27,23.7,47.7
+2025-10-21,00:05:30,23.8,47.6
+2025-10-21,00:06:33,23.8,47.6
+2025-10-21,00:07:36,23.7,48.0
+2025-10-21,00:08:38,23.7,47.7
+2025-10-21,00:09:41,23.7,47.9,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 23.7 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 47.9% (ideal 50–80%).
+2025-10-21,00:10:44,23.7,47.7,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 23.7 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 47.7% (ideal 50–80%).
+2025-10-21,00:11:47,23.7,47.6,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 23.7 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 47.6% (ideal 50–80%).
+2025-10-21,00:12:50,23.7,47.7,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 23.7 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 47.7% (ideal 50–80%).
+2025-10-21,00:13:52,23.7,47.6,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 23.7 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 47.6% (ideal 50–80%).
+2025-10-21,00:14:55,23.7,47.5,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 23.7 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 47.5% (ideal 50–80%).
+2025-10-21,00:15:58,23.7,47.6,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 23.7 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 47.6% (ideal 50–80%).
+2025-10-21,00:17:02,23.7,47.6,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 23.7 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 47.6% (ideal 50–80%).
+2025-10-21,09:43:24,21.5,50.5,N/A,N/A,N/A,Fuera de rango,,⚠️ Temperatura fuera de rango: 21.5 °C (ideal 34–36 °C).
+2025-10-21,09:47:44,21.8,48.7,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 21.8 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 48.7% (ideal 50–80%).
+2025-10-21,09:48:50,21.9,48.5,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 21.9 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 48.5% (ideal 50–80%).
+2025-10-21,09:49:54,21.9,48.7,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 21.9 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 48.7% (ideal 50–80%).
+2025-10-21,09:51:00,22.0,48.1,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 22.0 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 48.1% (ideal 50–80%).
+2025-10-21,09:52:05,22.1,48.4,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 22.1 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 48.4% (ideal 50–80%).
+2025-10-21,09:53:11,22.2,48.7,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 22.2 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 48.7% (ideal 50–80%).
+2025-10-21,09:54:16,22.3,48.0,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 22.3 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 48.0% (ideal 50–80%).
+2025-10-21,09:55:21,22.4,47.6,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 22.4 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 47.6% (ideal 50–80%).
+2025-10-21,09:56:25,22.4,47.3,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 22.4 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 47.3% (ideal 50–80%).
+2025-10-21,09:57:30,22.5,47.8,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 22.5 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 47.8% (ideal 50–80%).
+2025-10-21,09:58:36,22.6,47.9,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 22.6 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 47.9% (ideal 50–80%).
+2025-10-21,09:59:43,22.6,48.0,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 22.6 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 48.0% (ideal 50–80%).
+2025-10-21,10:00:48,22.7,47.6,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 22.7 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 47.6% (ideal 50–80%).
+2025-10-21,10:01:53,22.8,46.9,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 22.8 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 46.9% (ideal 50–80%).
+2025-10-21,10:02:58,22.8,47.1,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 22.8 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 47.1% (ideal 50–80%).
+2025-10-21,10:04:03,22.9,47.0,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 22.9 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 47.0% (ideal 50–80%).
+2025-10-21,10:05:08,23.0,46.6,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 23.0 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 46.6% (ideal 50–80%).
+2025-10-21,10:06:14,23.1,47.5,N/A,N/A,N/A,Fuera de rango,Fuera de rango,⚠️ Temperatura fuera de rango: 23.1 °C (ideal 34–36 °C). ⚠️ Humedad fuera de rango: 47.5% (ideal 50–80%).
