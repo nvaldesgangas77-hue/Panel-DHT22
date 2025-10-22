@@ -11,6 +11,7 @@ import smtplib
 from email.message import EmailMessage
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 import requests
@@ -44,10 +45,10 @@ app = Flask(__name__)
 app.secret_key = "supersecreto_nico"
 app.permanent_session_lifetime = timedelta(minutes=15)
 # ---------------- Umbrales de temperatura y humedad ----------------
-TEMP_MIN = 32.0
-TEMP_MAX = 37.0
-HUM_MIN = 50.0
-HUM_MAX = 80.0
+TEMP_MIN = 30.0
+TEMP_MAX = 39.0
+HUM_MIN = 40.0
+HUM_MAX = 85.0
 
 alerta_activa = {"temp": False, "hum": False, "msg": ""}
 
@@ -144,7 +145,7 @@ def guardar_datos(temp, hum):
     alerta_msg = ""
     if temp < TEMP_MIN or temp > TEMP_MAX:
         alerta_activa["temp"] = True
-        alerta_msg += f"⚠️ Temperatura fuera de rango: {temp:.1f} °C (ideal 34–36 °C). "
+        alerta_msg += f"⚠️ Temperatura fuera de rango: {temp:.1f} °C (ideal 30–38 °C). "
     else:
         alerta_activa["temp"] = False
 
@@ -165,36 +166,112 @@ def guardar_datos(temp, hum):
         prom_h = sum(buffer_hum) / len(buffer_hum)
         temp_ext, hum_ext, cond = obtener_clima()
 
-        archivo_prom = os.path.join(carpeta_mes, f"{dia}_promedios.csv")
+        # --- Guardar con formato en Excel (.xlsx) ---
+        from openpyxl import Workbook, load_workbook
+        from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+
+        # Crear o cargar archivo Excel
+        archivo_prom = os.path.join(carpeta_mes, f"{dia}_promedios.xlsx")
         existe_prom = os.path.exists(archivo_prom)
 
-        with open(archivo_prom, "a", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f, delimiter=";")
-            if not existe_prom:
-                writer.writerow([
-                    "Fecha", "Hora",
-                    "Temp promedio (°C)", "Hum promedio (%)",
-                    "Temp externa (°C)", "Hum externa (%)",
-                    "Condición climática", "Alerta temperatura",
-                    "Alerta humedad", "Mensaje"
-                ])
+        if existe_prom:
+            wb = load_workbook(archivo_prom)
+            ws = wb.active
+        else:
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Promedios"
 
-            alerta_temp = "Fuera de rango" if (prom_t < TEMP_MIN or prom_t > TEMP_MAX) else "Normal"
-            alerta_hum = "Fuera de rango" if (prom_h < HUM_MIN or prom_h > HUM_MAX) else "Normal"
-            mensaje = ""
-            if alerta_temp == "Fuera de rango":
-                mensaje += f"⚠️ Temperatura fuera de rango ({prom_t:.1f} °C). "
-            if alerta_hum == "Fuera de rango":
-                mensaje += f"⚠️ Humedad fuera de rango ({prom_h:.1f} %). "
+            # Encabezados
+            headers = [
+                "Fecha", "Hora",
+                "Temp promedio (°C)", "Hum promedio (%)",
+                "Temp externa (°C)", "Hum externa (%)",
+                "Condición climática", "Alerta temperatura",
+                "Alerta humedad", "Mensaje"
+            ]
+            ws.append(headers)
 
-            writer.writerow([
-                dia, fecha_actual.strftime("%H:%M:%S"),
-                round(prom_t, 2), round(prom_h, 2),
-                temp_ext if temp_ext is not None else "N/A",
-                hum_ext if hum_ext is not None else "N/A",
-                cond if cond else "N/A",
-                alerta_temp, alerta_hum, mensaje.strip()
-            ])
+            # Estilo para encabezados
+            header_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
+            header_font = Font(bold=True, color="000000")
+            thin = Side(border_style="thin", color="000000")
+
+            for cell in ws[1]:
+                cell.fill = header_fill
+                cell.font = header_font
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
+
+        # --- Evaluar alertas con doble umbral ---
+        alerta_temp = "Óptima"
+        alerta_hum = "Óptima"
+        mensaje = ""
+
+        # Temperatura
+        if prom_t < 30 or prom_t > 38:
+            alerta_temp = "Crítica"
+            mensaje += f"🚨 Temperatura crítica ({prom_t:.1f} °C; fuera del rango 30–38 °C). "
+        elif prom_t < 32 or prom_t > 36:
+            alerta_temp = "Precaución"
+            mensaje += f"⚠️ Temperatura fuera del rango óptimo ({prom_t:.1f} °C; ideal 32–36 °C). "
+
+        # Humedad
+        if prom_h < 40 or prom_h > 85:
+            alerta_hum = "Crítica"
+            mensaje += f"🚨 Humedad crítica ({prom_h:.1f}% fuera del rango 40–85%). "
+        elif prom_h < 50 or prom_h > 75:
+            alerta_hum = "Precaución"
+            mensaje += f"⚠️ Humedad fuera del rango óptimo ({prom_h:.1f}%; ideal 50–75%). "
+
+        # Agregar fila
+        nueva_fila = [
+            dia, fecha_actual.strftime("%H:%M:%S"),
+            round(prom_t, 2), round(prom_h, 2),
+            temp_ext if temp_ext is not None else "N/A",
+            hum_ext if hum_ext is not None else "N/A",
+            cond if cond else "N/A",
+            alerta_temp, alerta_hum, mensaje.strip()
+        ]
+        ws.append(nueva_fila)
+
+        # Aplicar estilo general de bordes
+        thin = Side(border_style="thin", color="000000")
+        for col in ws.columns:
+            for cell in col:
+                cell.border = Border(top=thin, left=thin, right=thin, bottom=thin)
+
+        # --- Colorear filas según el nivel de alerta ---
+        # Verde = Óptima | Amarillo = Precaución | Rojo = Crítica
+
+        fill_optima = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")  # Verde suave
+        fill_precaucion = PatternFill(start_color="FFF2CC", end_color="FFF2CC", fill_type="solid")  # Amarillo
+        fill_critica = PatternFill(start_color="F8CBAD", end_color="F8CBAD", fill_type="solid")  # Rojo claro
+
+        # Determinar color
+        if "Crítica" in (alerta_temp, alerta_hum):
+            fill = fill_critica
+        elif "Precaución" in (alerta_temp, alerta_hum):
+            fill = fill_precaucion
+        else:
+            fill = fill_optima
+
+        # Aplicar color a la última fila agregada
+        for cell in ws[ws.max_row]:
+            cell.fill = fill
+
+        # Ajustar ancho automático
+        for col in ws.columns:
+            max_length = 0
+            col_letter = col[0].column_letter
+            for cell in col:
+                if cell.value:
+                    max_length = max(max_length, len(str(cell.value)))
+            ws.column_dimensions[col_letter].width = max_length + 2
+
+        # Guardar y cerrar archivo
+        wb.save(archivo_prom)
+        wb.close()
 
         buffer_temp.clear()
         buffer_hum.clear()
@@ -657,7 +734,7 @@ def monitor_sistema():
         except Exception as e:
             print(f"Error en monitor_sistema: {e}")
 
-        time.sleep(600)
+        time.sleep(3600)
 
 threading.Thread(target=monitor_sistema, daemon=True).start()
 # ---------------- CLIMA EXTERNO (API OpenWeatherMap) ----------------
